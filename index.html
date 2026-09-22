@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Numerical Methods — Interactive Walkthrough</title>
+<meta name="description" content="Step-by-step animated walkthroughs of the numerical methods in the Computational Physics Toolkit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0F1C;
+    --panel:#121A2C;
+    --panel-2:#0E1524;
+    --border:#26314A;
+    --text:#EDF1F7;
+    --text-dim:#8FA0BC;
+    --amber:#E8A94A;
+    --teal:#4FD1C5;
+    --red:#E06C75;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  a{color:inherit;}
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 32px; }
+
+  nav{
+    position:sticky; top:0; z-index:10;
+    background:rgba(10,15,28,0.9);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:18px 32px; }
+  .brand{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--text-dim); text-decoration:none; }
+  .brand strong{ color:var(--text); font-weight:500; }
+  .nav-gh{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--border);
+    padding:8px 14px; font-size:13px;
+    text-decoration:none; color:var(--text);
+  }
+  .nav-gh:hover{ border-color:var(--amber); color:var(--amber); }
+
+  .page-head{ padding:72px 0 48px; border-bottom:1px solid var(--border); }
+  .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--amber); margin-bottom:16px; }
+  h1.title{ font-size:44px; line-height:1.1; max-width:16ch; }
+  .page-head p{ margin-top:18px; color:var(--text-dim); font-size:16px; max-width:60ch; }
+
+  .toc{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin-top:32px;
+  }
+  .toc a{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--text-dim);
+    text-decoration:none;
+    border:1px solid var(--border);
+    padding:7px 12px;
+  }
+  .toc a:hover{ color:var(--amber); border-color:var(--amber); }
+
+  .algo{ padding:64px 0; border-bottom:1px solid var(--border); scroll-margin-top:72px; }
+  .algo-head{ max-width:70ch; margin-bottom:32px; }
+  .algo-head .num{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--teal); }
+  .algo-head h2{ font-size:28px; margin-top:8px; }
+  .algo-head p{ color:var(--text-dim); margin-top:10px; font-size:15px; }
+
+  .algo-body{
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap:24px;
+    align-items:start;
+  }
+  .stage{
+    border:1px solid var(--border);
+    background:var(--panel-2);
+  }
+  .stage canvas{ display:block; width:100%; height:340px; }
+  .controls{
+    display:flex; align-items:center; gap:10px;
+    padding:14px 16px;
+    border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    padding:8px 14px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .btn:hover{ border-color:var(--amber); color:var(--amber); }
+  .btn:disabled{ opacity:0.35; cursor:default; }
+  .btn:disabled:hover{ border-color:var(--border); color:var(--text); }
+  .btn-accent{ border-color:var(--amber); color:var(--amber); }
+  .field{
+    display:flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--text-dim);
+  }
+  .field input{
+    width:56px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    padding:5px 6px;
+  }
+  .spacer{ flex:1; }
+
+  .panel{
+    border:1px solid var(--border);
+    background:var(--panel);
+    display:flex; flex-direction:column;
+    height:100%;
+  }
+  .panel-head{
+    padding:12px 16px;
+    border-bottom:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .panel-body{
+    padding:14px 16px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    overflow-y:auto;
+    max-height:340px;
+  }
+  .readout-row{
+    display:flex; justify-content:space-between; gap:8px;
+    padding:6px 0;
+    border-bottom:1px dashed rgba(255,255,255,0.06);
+    color:var(--text-dim);
+  }
+  .readout-row.head{ color:var(--text); border-bottom:1px solid var(--border); }
+  .readout-row span:first-child{ color:var(--text); }
+  .result-line{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid var(--border);
+    color:var(--amber);
+  }
+
+  .mgrid{
+    display:grid;
+    grid-template-columns:repeat(3, 44px);
+    gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:14px;
+  }
+  .mcell{
+    width:44px; height:44px;
+    display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border);
+    background:var(--panel-2);
+    transition:background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .mcell.active{ border-color:var(--amber); color:var(--amber); background:rgba(232,169,74,0.08); }
+  .mcell.done{ border-color:var(--teal); color:var(--teal); }
+  .mrow-wrap{ display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+  .mop{ font-family:'Fraunces',serif; font-size:26px; color:var(--text-dim); }
+
+  footer{ padding:48px 0 64px; }
+  footer .row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; }
+  footer p, footer a{ font-size:13px; color:var(--text-dim); font-family:'JetBrains Mono',monospace; text-decoration:none; }
+  footer a:hover{ color:var(--amber); }
+
+  @media (max-width:860px){
+    .algo-body{ grid-template-columns:1fr; }
+    h1.title{ font-size:32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="index.html">&larr; <strong>computational-physics-toolkit</strong></a>
+    <a class="nav-gh" href="https://github.com/chowdhrynida/computational-physics-toolkit/tree/main/Numerical-Methods" target="_blank" rel="noopener">View source folder</a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow">Numerical Methods</div>
+    <h1 class="title">Watch each method converge.</h1>
+    <p>Every algorithm below runs the same logic as its Python file in the repository — same test function, same default values. Step through it by hand, or hit play and let it run.</p>
+    <div class="toc">
+      <a href="#bisection">Bisection</a>
+      <a href="#false-position">False position</a>
+      <a href="#newton">Newton&ndash;Raphson</a>
+      <a href="#trapezoidal">Trapezoidal rule</a>
+      <a href="#simpson">Simpson's rule</a>
+      <a href="#analytical">Analytical integral</a>
+      <a href="#matrix-add">Matrix addition</a>
+      <a href="#matrix-mul">Matrix multiplication</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ BISECTION ============ -->
+<section class="algo" id="bisection">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">01 · Root finding</div>
+      <h2>Bisection method</h2>
+      <p>f(x) = x² − 25. Start with an interval [a, b] where f changes sign, then repeatedly halve it — keeping whichever half still brackets the root — until it's tiny.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-bisection"></canvas></div>
+        <div class="controls">
+          <div class="field">a <input id="bis-a" type="number" value="0" step="1"></div>
+          <div class="field">b <input id="bis-b" type="number" value="10" step="1"></div>
+          <button class="btn btn-accent" id="bis-reset">Reset</button>
+          <button class="btn" id="bis-step">Step &rarr;</button>
+          <button class="btn" id="bis-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Iteration log</div>
+        <div class="panel-body" id="bis-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FALSE POSITION ============ -->
+<section class="algo" id="false-position">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">02 · Root finding</div>
+      <h2>False position method</h2>
+      <p>Same bracket [a, b] as bisection, but instead of the midpoint, draw a straight line between (a, f(a)) and (b, f(b)) — the root of that line is the next guess.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-falseposition"></canvas></div>
+        <div class="controls">
+          <div class="field">a <input id="fp-a" type="number" value="0" step="1"></div>
+          <div class="field">b <input id="fp-b" type="number" value="10" step="1"></div>
+          <button class="btn btn-accent" id="fp-reset">Reset</button>
+          <button class="btn" id="fp-step">Step &rarr;</button>
+          <button class="btn" id="fp-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Iteration log</div>
+        <div class="panel-body" id="fp-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEWTON RAPHSON ============ -->
+<section class="algo" id="newton">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">03 · Root finding</div>
+      <h2>Newton&ndash;Raphson method</h2>
+      <p>f(x) = x² − 25, f′(x) = 2x. From a starting guess, follow the tangent line down to where it crosses zero — that's the next guess. Converges fast when it converges at all.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-newton"></canvas></div>
+        <div class="controls">
+          <div class="field">x₀ <input id="nr-x0" type="number" value="9" step="0.5"></div>
+          <button class="btn btn-accent" id="nr-reset">Reset</button>
+          <button class="btn" id="nr-step">Step &rarr;</button>
+          <button class="btn" id="nr-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Iteration log</div>
+        <div class="panel-body" id="nr-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRAPEZOIDAL ============ -->
+<section class="algo" id="trapezoidal">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">04 · Integration</div>
+      <h2>Trapezoidal rule</h2>
+      <p>f(x) = x² on [0, 2], split into 10 strips. Each strip is approximated as a trapezoid; the total area builds up one strip at a time.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-trapezoidal"></canvas></div>
+        <div class="controls">
+          <button class="btn btn-accent" id="tr-reset">Reset</button>
+          <button class="btn" id="tr-step">Step &rarr;</button>
+          <button class="btn" id="tr-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Running sum</div>
+        <div class="panel-body" id="tr-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SIMPSON ============ -->
+<section class="algo" id="simpson">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">05 · Integration</div>
+      <h2>Simpson's 1/3 rule</h2>
+      <p>f(x) = x³ on [0, 1], split into 10 strips. Points alternate weight 4 and 2 (endpoints get weight 1) — a weighted sum that's exact for cubics.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-simpson"></canvas></div>
+        <div class="controls">
+          <button class="btn btn-accent" id="sp-reset">Reset</button>
+          <button class="btn" id="sp-step">Step &rarr;</button>
+          <button class="btn" id="sp-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Weighted sum</div>
+        <div class="panel-body" id="sp-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANALYTICAL ============ -->
+<section class="algo" id="analytical">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">06 · Integration</div>
+      <h2>Analytical integration</h2>
+      <p>The baseline every numerical method above is checked against: ∫sin(x)dx from 0 to 1, solved exactly as −cos(b) + cos(a).</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage"><canvas id="cv-analytical"></canvas></div>
+        <div class="controls">
+          <button class="btn btn-accent" id="an-reset">Reset</button>
+          <button class="btn" id="an-play">Sweep the area</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Exact value</div>
+        <div class="panel-body" id="an-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MATRIX ADD ============ -->
+<section class="algo" id="matrix-add">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">07 · Linear algebra</div>
+      <h2>Matrix addition</h2>
+      <p>Two 3×3 matrices, added element by element: c[i][j] = a[i][j] + b[i][j].</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage" style="padding:32px; display:flex; align-items:center; justify-content:center;">
+          <div class="mrow-wrap" id="madd-stage"></div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-accent" id="madd-reset">Reset</button>
+          <button class="btn" id="madd-step">Step &rarr;</button>
+          <button class="btn" id="madd-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Current operation</div>
+        <div class="panel-body" id="madd-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MATRIX MUL ============ -->
+<section class="algo" id="matrix-mul">
+  <div class="wrap">
+    <div class="algo-head">
+      <div class="num">08 · Linear algebra</div>
+      <h2>Matrix multiplication</h2>
+      <p>Two 3×3 matrices. Each result cell is the dot product of a row from A and a column from B — the row and column light up as they're multiplied and summed.</p>
+    </div>
+    <div class="algo-body">
+      <div>
+        <div class="stage" style="padding:32px; display:flex; align-items:center; justify-content:center;">
+          <div class="mrow-wrap" id="mmul-stage"></div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-accent" id="mmul-reset">Reset</button>
+          <button class="btn" id="mmul-step">Step &rarr;</button>
+          <button class="btn" id="mmul-play">Play</button>
+          <div class="spacer"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Current operation</div>
+        <div class="panel-body" id="mmul-log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap row">
+    <p>Part of computational-physics-toolkit · Numerical Methods module</p>
+    <a href="index.html">&larr; Back to overview</a>
+  </div>
+</footer>
+
+<script>
+/* ---------------------------------------------------------------
+   Shared plotting helper: draws axes + a function curve on canvas,
+   returns a coordinate transform so each algorithm can draw on top.
+----------------------------------------------------------------*/
+function makePlot(canvasId, {xMin, xMax, yMin, yMax, fn, fnColor='rgba(255,255,255,0.35)'}){
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  let w,h,dpr;
+
+  function resize(){
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.clientWidth; h = canvas.clientHeight;
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  const pad = {l:38,r:18,t:18,b:30};
+  function toPx(x,y){
+    const px = pad.l + (x-xMin)/(xMax-xMin) * (w-pad.l-pad.r);
+    const py = h-pad.b - (y-yMin)/(yMax-yMin) * (h-pad.t-pad.b);
+    return [px,py];
+  }
+
+  let overlay = ()=>{};
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    // grid
+    ctx.strokeStyle='rgba(255,255,255,0.05)';
+    ctx.lineWidth=1;
+    for(let i=0;i<=8;i++){
+      const gx = pad.l + i*(w-pad.l-pad.r)/8;
+      ctx.beginPath(); ctx.moveTo(gx,pad.t); ctx.lineTo(gx,h-pad.b); ctx.stroke();
+    }
+    for(let i=0;i<=6;i++){
+      const gy = pad.t + i*(h-pad.t-pad.b)/6;
+      ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(w-pad.r,gy); ctx.stroke();
+    }
+    // axes (x-axis at y=0 if in range)
+    ctx.strokeStyle='rgba(255,255,255,0.18)';
+    if(yMin<0 && yMax>0){
+      const [,zy] = toPx(0,0);
+      ctx.beginPath(); ctx.moveTo(pad.l,zy); ctx.lineTo(w-pad.r,zy); ctx.stroke();
+    }
+    // curve
+    if(fn){
+      ctx.strokeStyle = fnColor;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      const N = 200;
+      for(let i=0;i<=N;i++){
+        const x = xMin + (xMax-xMin)*i/N;
+        const y = fn(x);
+        const [px,py] = toPx(x, Math.max(yMin,Math.min(yMax,y)));
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.stroke();
+    }
+    // axis labels
+    ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.font='11px JetBrains Mono, monospace';
+    ctx.fillText(xMin.toString(), pad.l-2, h-pad.b+16);
+    ctx.fillText(xMax.toString(), w-pad.r-14, h-pad.b+16);
+    overlay(ctx, toPx);
+  }
+  resize();
+  return { canvas, ctx, toPx, redraw:()=>draw(), setOverlay:(fn)=>{overlay=fn; draw();} };
+}
+
+function fmt(n){ return Math.abs(n) < 0.0001 ? n.toExponential(2) : n.toFixed(4); }
+
+/* ---------------------------------------------------------------
+   01 — BISECTION
+----------------------------------------------------------------*/
+(function(){
+  const f = x => x*x - 25;
+  let a,b,c, history, done;
+  const plot = makePlot('cv-bisection', {xMin:-2,xMax:12,yMin:-30,yMax:80,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('bis-log');
+
+  function reset(){
+    a = parseFloat(document.getElementById('bis-a').value);
+    b = parseFloat(document.getElementById('bis-b').value);
+    history = [];
+    done = false;
+    render();
+  }
+  function step(){
+    if(done) return;
+    c = (a+b)/2;
+    history.push({a,b,c,fa:f(a),fb:f(b),fc:f(c)});
+    if(Math.abs(f(c)) < 0.01 || history.length>=14){ done = true; }
+    else if(f(a)*f(c) < 0){ b = c; } else { a = c; }
+    render();
+  }
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      const [ax] = toPx(a,0), [bx] = toPx(b,0);
+      ctx.fillStyle='rgba(232,169,74,0.12)';
+      ctx.fillRect(ax, 18, bx-ax, plot.canvas.clientHeight-48);
+      [['a',a,'#8FA0BC'],['b',b,'#8FA0BC']].forEach(([label,val,color])=>{
+        const [px,py]=toPx(val,0);
+        ctx.strokeStyle=color; ctx.beginPath(); ctx.moveTo(px,18); ctx.lineTo(px,plot.canvas.clientHeight-30); ctx.stroke();
+      });
+      if(history.length){
+        const last = history[history.length-1];
+        const [px,py] = toPx(last.c, last.fc);
+        ctx.fillStyle = '#E8A94A';
+        ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
+        const [px0] = toPx(last.c,0);
+        ctx.strokeStyle='#E8A94A'; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(px0,plot.canvas.clientHeight-30); ctx.lineTo(px,py); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+    log.innerHTML = '<div class="readout-row head"><span>iter</span><span>a</span><span>b</span><span>c</span><span>f(c)</span></div>' +
+      history.map((h,i)=>`<div class="readout-row"><span>${i}</span><span>${fmt(h.a)}</span><span>${fmt(h.b)}</span><span>${fmt(h.c)}</span><span>${fmt(h.fc)}</span></div>`).join('') +
+      (done && history.length ? `<div class="result-line">root &approx; ${fmt(history[history.length-1].c)}</div>` : '');
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('bis-step').disabled = done;
+  }
+  document.getElementById('bis-reset').onclick = reset;
+  document.getElementById('bis-step').onclick = step;
+  document.getElementById('bis-a').onchange = reset;
+  document.getElementById('bis-b').onchange = reset;
+  let playTimer=null;
+  document.getElementById('bis-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('bis-play').textContent='Play'; } }, 700);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   02 — FALSE POSITION
+----------------------------------------------------------------*/
+(function(){
+  const f = x => x*x - 25;
+  let a,b,c, history, done;
+  const plot = makePlot('cv-falseposition', {xMin:-2,xMax:12,yMin:-30,yMax:80,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('fp-log');
+
+  function reset(){
+    a = parseFloat(document.getElementById('fp-a').value);
+    b = parseFloat(document.getElementById('fp-b').value);
+    history = []; done=false;
+    render();
+  }
+  function step(){
+    if(done) return;
+    c = b - (f(b)*(a-b))/(f(a)-f(b));
+    history.push({a,b,c,fc:f(c)});
+    if(Math.abs(f(c)) < 0.01 || history.length>=14){ done=true; }
+    else if(f(a)*f(c) < 0){ b = c; } else { a = c; }
+    render();
+  }
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      const [ax] = toPx(a,0), [bx] = toPx(b,0);
+      ctx.fillStyle='rgba(79,209,197,0.10)';
+      ctx.fillRect(ax, 18, bx-ax, plot.canvas.clientHeight-48);
+      const [pax,pay] = toPx(a,f(a)), [pbx,pby] = toPx(b,f(b));
+      ctx.strokeStyle='rgba(232,169,74,0.7)'; ctx.setLineDash([4,3]);
+      ctx.beginPath(); ctx.moveTo(pax,pay); ctx.lineTo(pbx,pby); ctx.stroke();
+      ctx.setLineDash([]);
+      if(history.length){
+        const last = history[history.length-1];
+        const [px,py] = toPx(last.c, last.fc);
+        ctx.fillStyle = '#4FD1C5';
+        ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
+      }
+    });
+    log.innerHTML = '<div class="readout-row head"><span>iter</span><span>a</span><span>b</span><span>c</span><span>f(c)</span></div>' +
+      history.map((h,i)=>`<div class="readout-row"><span>${i}</span><span>${fmt(h.a)}</span><span>${fmt(h.b)}</span><span>${fmt(h.c)}</span><span>${fmt(h.fc)}</span></div>`).join('') +
+      (done && history.length ? `<div class="result-line">root &approx; ${fmt(history[history.length-1].c)}</div>` : '');
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('fp-step').disabled = done;
+  }
+  document.getElementById('fp-reset').onclick = reset;
+  document.getElementById('fp-step').onclick = step;
+  document.getElementById('fp-a').onchange = reset;
+  document.getElementById('fp-b').onchange = reset;
+  let playTimer=null;
+  document.getElementById('fp-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('fp-play').textContent='Play'; } }, 700);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   03 — NEWTON RAPHSON
+----------------------------------------------------------------*/
+(function(){
+  const f = x => x*x - 25;
+  const df = x => 2*x;
+  let x0, history, done;
+  const plot = makePlot('cv-newton', {xMin:-2,xMax:12,yMin:-30,yMax:80,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('nr-log');
+
+  function reset(){
+    x0 = parseFloat(document.getElementById('nr-x0').value);
+    history = []; done=false;
+    render();
+  }
+  function step(){
+    if(done) return;
+    const fx = f(x0), dfx = df(x0);
+    if(dfx === 0){ done=true; render(); return; }
+    const x1 = x0 - fx/dfx;
+    history.push({x0, fx, dfx, x1});
+    if(Math.abs(x1-x0) < 0.01 || history.length>=10){ done=true; }
+    x0 = x1;
+    render();
+  }
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      if(history.length===0){
+        const [px,py] = toPx(x0, f(x0));
+        ctx.fillStyle='#E8A94A'; ctx.beginPath(); ctx.arc(px,py,5,0,7); ctx.fill();
+        return;
+      }
+      const last = history[history.length-1];
+      // tangent line at last.x0
+      const [p1x,p1y] = toPx(last.x0-6, f(last.x0) - last.dfx*6);
+      const [p2x,p2y] = toPx(last.x0+6, f(last.x0) + last.dfx*6);
+      ctx.strokeStyle='rgba(232,169,74,0.75)'; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(p1x,p1y); ctx.lineTo(p2x,p2y); ctx.stroke();
+      const [p0x,p0y] = toPx(last.x0, last.fx);
+      ctx.fillStyle='#8FA0BC'; ctx.beginPath(); ctx.arc(p0x,p0y,4,0,7); ctx.fill();
+      const [p3x,p3y] = toPx(last.x1, 0);
+      ctx.fillStyle='#4FD1C5'; ctx.beginPath(); ctx.arc(p3x,p3y,5,0,7); ctx.fill();
+    });
+    log.innerHTML = '<div class="readout-row head"><span>iter</span><span>x</span><span>f(x)</span><span>x&#8321;</span></div>' +
+      history.map((h,i)=>`<div class="readout-row"><span>${i}</span><span>${fmt(h.x0)}</span><span>${fmt(h.fx)}</span><span>${fmt(h.x1)}</span></div>`).join('') +
+      (done && history.length ? `<div class="result-line">root &approx; ${fmt(history[history.length-1].x1)}</div>` : '');
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('nr-step').disabled = done;
+  }
+  document.getElementById('nr-reset').onclick = reset;
+  document.getElementById('nr-step').onclick = step;
+  document.getElementById('nr-x0').onchange = reset;
+  let playTimer=null;
+  document.getElementById('nr-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('nr-play').textContent='Play'; } }, 800);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   04 — TRAPEZOIDAL RULE
+----------------------------------------------------------------*/
+(function(){
+  const f = x => x*x;
+  const a0=0, b0=2, n=10, h=(b0-a0)/n;
+  let i, sum, done;
+  const plot = makePlot('cv-trapezoidal', {xMin:-0.3,xMax:2.3,yMin:-0.5,yMax:4.5,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('tr-log');
+
+  function reset(){ i=0; sum=0; done=false; render(); }
+  function step(){
+    if(done) return;
+    const x1 = a0 + i*h, x2 = a0 + (i+1)*h;
+    sum += 0.5*(f(x1)+f(x2))*h;
+    i++;
+    if(i>=n) done=true;
+    render();
+  }
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      for(let k=0;k<i;k++){
+        const x1=a0+k*h, x2=a0+(k+1)*h;
+        const [p1x,p1y]=toPx(x1,0), [p2x] = toPx(x2,0);
+        const [,y1]=toPx(x1,f(x1)); const [,y2]=toPx(x2,f(x2));
+        ctx.fillStyle = k===i-1 ? 'rgba(232,169,74,0.35)' : 'rgba(79,209,197,0.16)';
+        ctx.beginPath();
+        ctx.moveTo(p1x,p1y); ctx.lineTo(p1x,y1); ctx.lineTo(p2x,y2); ctx.lineTo(p2x,p2y); ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.stroke();
+      }
+    });
+    const exact = (Math.pow(b0,3)-Math.pow(a0,3))/3;
+    log.innerHTML = '<div class="readout-row head"><span>strip</span><span>area added</span><span>running sum</span></div>' +
+      Array.from({length:i}).map((_,k)=>{
+        const x1=a0+k*h, x2=a0+(k+1)*h;
+        const add = 0.5*(f(x1)+f(x2))*h;
+        let running=0; for(let m=0;m<=k;m++){ const xx1=a0+m*h, xx2=a0+(m+1)*h; running+=0.5*(f(xx1)+f(xx2))*h; }
+        return `<div class="readout-row"><span>${k}</span><span>${fmt(add)}</span><span>${fmt(running)}</span></div>`;
+      }).join('') +
+      (done ? `<div class="result-line">&int; &approx; ${fmt(sum)} &nbsp;(exact = ${fmt(exact)})</div>` : '');
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('tr-step').disabled = done;
+  }
+  document.getElementById('tr-reset').onclick = reset;
+  document.getElementById('tr-step').onclick = step;
+  let playTimer=null;
+  document.getElementById('tr-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('tr-play').textContent='Play'; } }, 350);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   05 — SIMPSON'S RULE
+----------------------------------------------------------------*/
+(function(){
+  const f = x => x*x*x;
+  const a0=0, b0=1, n=10, h=(b0-a0)/n;
+  let i, weighted, done;
+  const plot = makePlot('cv-simpson', {xMin:-0.15,xMax:1.15,yMin:-0.1,yMax:1.1,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('sp-log');
+
+  function weight(idx){ if(idx===0||idx===n) return 1; return idx%2===1 ? 4 : 2; }
+
+  function reset(){ i=0; weighted = f(a0)+f(b0); done=false; render(); }
+  function step(){
+    if(done) return;
+    i++;
+    if(i<n){ weighted += weight(i)*f(a0+i*h); }
+    if(i>=n-1) done=true;
+    render();
+  }
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      for(let k=1;k<=i && k<n;k++){
+        const x = a0+k*h;
+        const [px] = toPx(x,0); const [,py] = toPx(x,f(x));
+        ctx.strokeStyle = weight(k)===4 ? 'rgba(232,169,74,0.8)' : 'rgba(79,209,197,0.8)';
+        ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(px, plot.canvas.clientHeight-30); ctx.lineTo(px,py); ctx.stroke();
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.beginPath(); ctx.arc(px,py,3.5,0,7); ctx.fill();
+      }
+    });
+    const integral = weighted*(h/3);
+    const exact = (Math.pow(b0,4)-Math.pow(a0,4))/4;
+    log.innerHTML = '<div class="readout-row head"><span>point</span><span>x</span><span>weight</span></div>' +
+      Array.from({length:Math.min(i,n-1)}).map((_,k)=>{
+        const idx=k+1, x=a0+idx*h;
+        return `<div class="readout-row"><span>${idx}</span><span>${fmt(x)}</span><span>${weight(idx)}</span></div>`;
+      }).join('') +
+      (done ? `<div class="result-line">&int; &approx; ${fmt(integral)} &nbsp;(exact = ${fmt(exact)})</div>` : '');
+    log.scrollTop = log.scrollHeight;
+    document.getElementById('sp-step').disabled = done;
+  }
+  document.getElementById('sp-reset').onclick = reset;
+  document.getElementById('sp-step').onclick = step;
+  let playTimer=null;
+  document.getElementById('sp-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('sp-play').textContent='Play'; } }, 350);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   06 — ANALYTICAL INTEGRAL
+----------------------------------------------------------------*/
+(function(){
+  const f = x => Math.sin(x);
+  const a0=0, b0=1;
+  const plot = makePlot('cv-analytical', {xMin:-0.2,xMax:1.3,yMin:-0.2,yMax:1.1,fn:f,fnColor:'rgba(143,160,188,0.5)'});
+  const log = document.getElementById('an-log');
+  let sweep = 0, playTimer=null;
+
+  function render(){
+    plot.setOverlay((ctx,toPx)=>{
+      const N=60;
+      ctx.fillStyle='rgba(232,169,74,0.22)';
+      ctx.beginPath();
+      const [x0px,y0px] = toPx(a0,0);
+      ctx.moveTo(x0px,y0px);
+      for(let k=0;k<=N;k++){
+        const x = a0 + (b0-a0)*sweep*k/N;
+        const [px,py] = toPx(x, f(x));
+        ctx.lineTo(px,py);
+      }
+      const [xe] = toPx(a0+(b0-a0)*sweep,0);
+      ctx.lineTo(xe,y0px);
+      ctx.closePath(); ctx.fill();
+    });
+    const exact = -Math.cos(b0)+Math.cos(a0);
+    const running = -Math.cos(a0+(b0-a0)*sweep)+Math.cos(a0);
+    log.innerHTML = `<div class="readout-row"><span>sweeping to x =</span><span>${fmt(a0+(b0-a0)*sweep)}</span></div>` +
+      `<div class="readout-row"><span>area so far</span><span>${fmt(running)}</span></div>` +
+      `<div class="result-line">&int;&#8320;&sup1; sin(x) dx = &minus;cos(1) + cos(0) &approx; ${fmt(exact)}</div>`;
+  }
+  document.getElementById('an-reset').onclick = ()=>{ sweep=0; if(playTimer){clearInterval(playTimer);playTimer=null;document.getElementById('an-play').textContent='Sweep the area';} render(); };
+  document.getElementById('an-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Sweep the area'; return; }
+    sweep=0; this.textContent='Sweeping…';
+    playTimer = setInterval(()=>{
+      sweep += 0.02;
+      if(sweep>=1){ sweep=1; clearInterval(playTimer); playTimer=null; document.getElementById('an-play').textContent='Sweep the area'; }
+      render();
+    }, 25);
+  };
+  render();
+})();
+
+/* ---------------------------------------------------------------
+   07 — MATRIX ADDITION
+----------------------------------------------------------------*/
+(function(){
+  const A = [[2,4,1],[0,3,5],[7,1,2]];
+  const B = [[1,0,3],[4,2,1],[0,6,2]];
+  let C = [[null,null,null],[null,null,null],[null,null,null]];
+  let i=0,j=0, done=false;
+  const stage = document.getElementById('madd-stage');
+  const log = document.getElementById('madd-log');
+
+  function grid(mat, cls, activeCell){
+    const g = document.createElement('div'); g.className='mgrid';
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+      const cell = document.createElement('div');
+      cell.className = 'mcell';
+      const v = mat[r][c];
+      cell.textContent = (v===null||v===undefined) ? '' : v;
+      if(activeCell && activeCell[0]===r && activeCell[1]===c) cell.classList.add('active');
+      if(cls==='done' && v!==null && v!==undefined) cell.classList.add('done');
+      g.appendChild(cell);
+    }
+    return g;
+  }
+  function render(){
+    stage.innerHTML='';
+    const active = done ? null : [i,j];
+    stage.appendChild(grid(A,'a',active));
+    const op1 = document.createElement('div'); op1.className='mop'; op1.textContent='+';
+    stage.appendChild(op1);
+    stage.appendChild(grid(B,'b',active));
+    const op2 = document.createElement('div'); op2.className='mop'; op2.textContent='=';
+    stage.appendChild(op2);
+    stage.appendChild(grid(C,'done',null));
+
+    log.innerHTML = done
+      ? `<div class="result-line">addition complete</div>`
+      : `<div class="readout-row"><span>cell</span><span>[${i}][${j}]</span></div>` +
+        `<div class="readout-row"><span>a[${i}][${j}]</span><span>${A[i][j]}</span></div>` +
+        `<div class="readout-row"><span>b[${i}][${j}]</span><span>${B[i][j]}</span></div>` +
+        `<div class="readout-row"><span>c[${i}][${j}] = a+b</span><span>${A[i][j]+B[i][j]}</span></div>`;
+    document.getElementById('madd-step').disabled = done;
+  }
+  function reset(){ C=[[null,null,null],[null,null,null],[null,null,null]]; i=0;j=0;done=false; render(); }
+  function step(){
+    if(done) return;
+    C[i][j] = A[i][j]+B[i][j];
+    j++; if(j>2){ j=0; i++; }
+    if(i>2) done=true;
+    render();
+  }
+  document.getElementById('madd-reset').onclick = reset;
+  document.getElementById('madd-step').onclick = step;
+  let playTimer=null;
+  document.getElementById('madd-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('madd-play').textContent='Play'; } }, 400);
+  };
+  reset();
+})();
+
+/* ---------------------------------------------------------------
+   08 — MATRIX MULTIPLICATION
+----------------------------------------------------------------*/
+(function(){
+  const A = [[1,2,0],[0,1,3],[2,1,1]];
+  const B = [[2,0,1],[1,1,0],[0,2,3]];
+  let C = [[null,null,null],[null,null,null],[null,null,null]];
+  let i=0,j=0,k=0, acc=0, done=false;
+  const stage = document.getElementById('mmul-stage');
+  const log = document.getElementById('mmul-log');
+
+  function gridA(){
+    const g=document.createElement('div'); g.className='mgrid';
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+      const cell=document.createElement('div'); cell.className='mcell'; cell.textContent=A[r][c];
+      if(!done && r===i && c===k) cell.classList.add('active');
+      g.appendChild(cell);
+    }
+    return g;
+  }
+  function gridB(){
+    const g=document.createElement('div'); g.className='mgrid';
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+      const cell=document.createElement('div'); cell.className='mcell'; cell.textContent=B[r][c];
+      if(!done && r===k && c===j) cell.classList.add('active');
+      g.appendChild(cell);
+    }
+    return g;
+  }
+  function gridC(){
+    const g=document.createElement('div'); g.className='mgrid';
+    for(let r=0;r<3;r++) for(let c=0;c<3;c++){
+      const cell=document.createElement('div'); cell.className='mcell';
+      const v = C[r][c];
+      cell.textContent = (v===null) ? '' : v;
+      if(v!==null) cell.classList.add('done');
+      if(!done && r===i && c===j) cell.classList.add('active');
+      g.appendChild(cell);
+    }
+    return g;
+  }
+  function render(){
+    stage.innerHTML='';
+    stage.appendChild(gridA());
+    const op1=document.createElement('div'); op1.className='mop'; op1.textContent='×'; stage.appendChild(op1);
+    stage.appendChild(gridB());
+    const op2=document.createElement('div'); op2.className='mop'; op2.textContent='='; stage.appendChild(op2);
+    stage.appendChild(gridC());
+
+    log.innerHTML = done
+      ? `<div class="result-line">multiplication complete</div>`
+      : `<div class="readout-row"><span>computing c[${i}][${j}]</span></div>` +
+        `<div class="readout-row"><span>k</span><span>${k}</span></div>` +
+        `<div class="readout-row"><span>a[${i}][${k}] &times; b[${k}][${j}]</span><span>${A[i][k]} &times; ${B[k][j]} = ${A[i][k]*B[k][j]}</span></div>` +
+        `<div class="readout-row"><span>running sum</span><span>${acc}</span></div>`;
+    document.getElementById('mmul-step').disabled = done;
+  }
+  function reset(){ C=[[null,null,null],[null,null,null],[null,null,null]]; i=0;j=0;k=0;acc=0;done=false; render(); }
+  function step(){
+    if(done) return;
+    acc += A[i][k]*B[k][j];
+    k++;
+    if(k>2){
+      C[i][j] = acc;
+      acc = 0; k=0; j++;
+      if(j>2){ j=0; i++; }
+      if(i>2) done=true;
+    }
+    render();
+  }
+  document.getElementById('mmul-reset').onclick = reset;
+  document.getElementById('mmul-step').onclick = step;
+  let playTimer=null;
+  document.getElementById('mmul-play').onclick = function(){
+    if(playTimer){ clearInterval(playTimer); playTimer=null; this.textContent='Play'; return; }
+    this.textContent='Pause';
+    playTimer = setInterval(()=>{ step(); if(done){ clearInterval(playTimer); playTimer=null; document.getElementById('mmul-play').textContent='Play'; } }, 300);
+  };
+  reset();
+})();
+</script>
+</body>
+</html>
